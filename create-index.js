@@ -1,6 +1,5 @@
 var level = require('./level')
-var through = require('through2')
-var concat = require('concat-stream')
+var stream = require('stream-wrapper')
 var pump = require('pump')
 var tokenize = require('./tokenize')
 
@@ -11,8 +10,7 @@ var keysdb = level('keys')
 module.exports = createIndex
 
 function createIndex (cb) {
-  var createBatch = through.obj(function (issue, enc, cb) {
-    var self = this
+  var createBatch = stream.writable({objectMode: true}, function (issue, enc, cb) {
     var searchBody = [
       issue.body,
       issue.title,
@@ -32,14 +30,15 @@ function createIndex (cb) {
           return {type: 'del', key: key}
         })
         indexdb.batch(batch, deletedKeys)
-      } catch (e) {}
+      } catch (e) { deletedKeys() }
     })
 
     function deletedKeys () {
       keysdb.put(issue.number.toString(), JSON.stringify(keys))
-      keys.forEach(function (key) {
-        self.push({ type: 'put', key: key, value: JSON.stringify(issue) })
+      var batch = keys.map(function (key) {
+        return { type: 'put', key: key, value: JSON.stringify(issue) }
       })
+      indexdb.batch(batch)
       cb()
     }
   })
@@ -47,9 +46,7 @@ function createIndex (cb) {
   pump(
     issues.createValueStream({valueEncoding: 'json'}),
     createBatch,
-    concat(function (batch) {
-      indexdb.batch(batch, cb)
-    })
+    cb
   )
 
   function getScore (issue) {
@@ -77,4 +74,12 @@ function hasLabel (issue, name) {
     .some(function (label) {
       return label.name === name
     })
+}
+
+if (require.main === module) {
+  console.log('Start indexing.')
+  createIndex(function (err) {
+    if (err) console.trace(err)
+    console.log('done')
+  })
 }

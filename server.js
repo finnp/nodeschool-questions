@@ -65,7 +65,11 @@ server.listen(PORT, function () {
     download(GH_KEY, function (err) {
       console.log('Updating index.')
       if (err) return console.error(err)
-      createIndex(cb)
+      createIndex(function (err) {
+        if (err) return console.error(err)
+        console.log('done.')
+        cb()
+      })
     })
   }
   function loop () {
