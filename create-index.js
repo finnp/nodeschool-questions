@@ -2,6 +2,7 @@ var level = require('./level')
 var stream = require('stream-wrapper')
 var pump = require('pump')
 var tokenize = require('./tokenize')
+var pad = require('./util').pad
 
 var indexdb = level('index')
 var issues = level('issues')
@@ -21,8 +22,6 @@ function createIndex (cb) {
     var keys = tokens.map(function (token) {
       return token + '~' + pad(score) + '-' + issue.number
     })
-    // TODO: all this stuff should be atomic
-    // delete old keys first
     keysdb.get(issue.number.toString(), function (err, keys) {
       if (err) return deletedKeys()
       try {
@@ -36,7 +35,7 @@ function createIndex (cb) {
     function deletedKeys () {
       keysdb.put(issue.number.toString(), JSON.stringify(keys))
       var batch = keys.map(function (key) {
-        return { type: 'put', key: key, value: JSON.stringify(issue) }
+        return { type: 'put', key: key, value: pad(issue.number) }
       })
       indexdb.batch(batch)
       cb()
@@ -62,11 +61,6 @@ function createIndex (cb) {
     if (issue.labels.length > 0) badScore -= 2
     return badScore
   }
-}
-
-function pad (score) {
-  var padding = '00000'
-  return padding.slice(score.toString().length) + score.toString()
 }
 
 function hasLabel (issue, name) {

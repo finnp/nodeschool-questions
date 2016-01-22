@@ -1,4 +1,4 @@
-var IGNORE = require('./ignore')
+var IGNORE = require('./ignore.json')
 
 function tokenize (str) {
   var visited = {}

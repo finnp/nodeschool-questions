@@ -3,12 +3,13 @@ var http = require('http')
 var ndjson = require('ndjson')
 var pump = require('pump')
 var url = require('url')
-var through = require('through2')
 
 var search = require('./search')
 var level = require('./level')
 var download = require('./download')
 var createIndex = require('./create-index')
+var pad = require('./util').pad
+
 var issues = level('issues')
 
 var GH_KEY = process.env.GH_KEY
@@ -34,7 +35,6 @@ router.set('/search', function (req, res) {
   var queryString = url.parse(req.url, true).query.q
   pump(
     search(queryString),
-    through.obj(function (r, e, cb) { return cb(null, r.value) }),
     ndjson.serialize(),
     res
   )
@@ -53,11 +53,6 @@ var server = http.createServer(function (req, res) {
     res.end(err.message)
   }
 })
-
-function pad (score) {
-  var padding = '00000'
-  return padding.slice(score.toString().length) + score.toString()
-}
 
 server.listen(PORT, function () {
   function update (cb) {

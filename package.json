@@ -2,9 +2,10 @@
   "name": "nodeschool-search",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +18,6 @@
     "pump": "^1.0.1",
     "request-all-pages": "^0.3.1",
     "sorted-intersect-stream": "^2.0.1",
-    "stream-wrapper": "^0.1.2",
-    "through2": "^2.0.0"
+    "stream-wrapper": "^0.1.2"
   }
 }

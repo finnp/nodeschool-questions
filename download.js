@@ -1,5 +1,6 @@
 var requestAllPages = require('request-all-pages')
 var level = require('./level')
+var pad = require('./util').pad
 
 var issues = level('issues')
 
@@ -34,9 +35,4 @@ function downloadIssues (ghkey, cb) {
       cb()
     })
   })
-}
-
-function pad (score) {
-  var padding = '00000'
-  return padding.slice(score.toString().length) + score.toString()
 }
