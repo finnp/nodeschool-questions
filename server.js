@@ -32,9 +32,11 @@ router.set('/issues', function (req, res) {
 })
 
 router.set('/search', function (req, res) {
-  var queryString = url.parse(req.url, true).query.q
+  var query = url.parse(req.url, true).query
+  var queryString = query.q
+  var limit = Number(query.limit)
   pump(
-    search(queryString),
+    search(queryString, limit),
     ndjson.serialize(),
     res
   )

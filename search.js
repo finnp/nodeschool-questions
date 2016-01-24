@@ -3,13 +3,15 @@ var intersect = require('sorted-intersect-stream')
 var tokenize = require('./tokenize')
 var stream = require('stream-wrapper')
 var pump = require('pump')
+
 var indexdb = level('index')
 var issuesdb = level('issues')
 
 module.exports = search
 
-function search (keywords) {
+function search (keywords, limit) {
   var tokens = tokenize(keywords)
+  limit = limit || 10
   var filter = tokens
   .map(function (token) {
     return indexdb.createReadStream({gte: token + '~', lt: token + '~~'})
@@ -31,8 +33,23 @@ function search (keywords) {
 
   return pump(
     filter,
-    getIssues
+    getIssues,
+    take(limit)
   )
+}
+
+function take (limit) {
+  return stream.transform({objectMode: true}, write)
+
+  function write (obj, enc, next) {
+    if (limit) this.push(obj)
+    else {
+      this.push(null)
+      process.nextTick(this.destroy.bind(this))
+    }
+    limit--
+    next()
+  }
 }
 
 if (require.main === module) {
