@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "standard",
     "start": "node server.js"
   },
   "keywords": [],
@@ -19,5 +19,8 @@
     "request-all-pages": "^0.3.1",
     "sorted-intersect-stream": "^2.0.1",
     "stream-wrapper": "^0.1.2"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3"
   }
 }
