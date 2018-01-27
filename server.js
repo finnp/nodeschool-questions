@@ -4,13 +4,13 @@ var ndjson = require('ndjson')
 var pump = require('pump')
 var url = require('url')
 
-var search = require('./search')
-var level = require('./level')
-var download = require('./download')
-var createIndex = require('./create-index')
-var pad = require('./util').pad
+var search = require('./lib/search')
+var db = require('./lib/db')
+var download = require('./lib/download')
+var createIndex = require('./lib/create-index')
+var pad = require('./lib/util').pad
 
-var issues = level('issues')
+var issues = db('issues')
 
 var GH_KEY = process.env.GH_KEY
 var PORT = process.env.PORT || 3000
