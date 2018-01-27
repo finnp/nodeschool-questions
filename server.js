@@ -1,10 +1,13 @@
 var Router = require('http-hash-router')
-var http = require('http')
 var ndjson = require('ndjson')
 var pump = require('pump')
+var http = require('http')
+var path = require('path')
 var url = require('url')
 
-var nodeschool = require('./')
+var nodeschool = require('./')({
+  storagePath: path.join(__dirname, '/db')
+})
 
 var PORT = process.env.PORT || 3000
 
