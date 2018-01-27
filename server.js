@@ -4,28 +4,16 @@ var ndjson = require('ndjson')
 var pump = require('pump')
 var url = require('url')
 
-var search = require('./lib/search')
-var db = require('./lib/db')
-var download = require('./lib/download')
-var createIndex = require('./lib/create-index')
-var pad = require('./lib/util').pad
+var nodeschool = require('./')
 
-var issues = db('issues')
-
-var GH_KEY = process.env.GH_KEY
 var PORT = process.env.PORT || 3000
 
 var router = Router()
 
 router.set('/issues', function (req, res) {
   var query = url.parse(req.url, true).query
-  var opts = {}
-  opts.valueEncoding = 'json'
-  opts.keyEncoding = 'utf8'
-  if (query.from) opts.gte = pad(query.from)
-  if (query.to) opts.lte = pad(query.to)
   pump(
-    issues.createValueStream(opts),
+    nodeschool.getIssues(query.from, query.to),
     ndjson.serialize(),
     res
   )
@@ -36,7 +24,7 @@ router.set('/search', function (req, res) {
   var queryString = query.q
   var limit = Number(query.limit)
   pump(
-    search(queryString, limit),
+    nodeschool.search(queryString, limit),
     ndjson.serialize(),
     res
   )
@@ -57,22 +45,11 @@ var server = http.createServer(function (req, res) {
 })
 
 server.listen(PORT, function () {
-  function update (cb) {
-    console.log('Downloading issues.')
-    download(GH_KEY, function (err) {
-      console.log('Updating index.')
-      if (err) return console.error(err)
-      createIndex(function (err) {
-        if (err) return console.error(err)
-        console.log('done.')
-        cb()
-      })
+  nodeschool.repeatedUpdate(process.env.GH_KEY)
+    .on('log', function (log) {
+      console.log(log)
     })
-  }
-  function loop () {
-    update(function () {
-      setTimeout(loop, 60 * 60 * 1000)
+    .on('error', function (err) {
+      console.error(err)
     })
-  }
-  loop()
 })
