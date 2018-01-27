@@ -6,7 +6,8 @@ var path = require('path')
 var url = require('url')
 
 var nodeschool = require('./')({
-  storagePath: path.join(__dirname, '/db')
+  storagePath: path.join(__dirname, '/db'),
+  repo: 'nodeschool/berlin'
 })
 
 var PORT = process.env.PORT || 3000
@@ -48,6 +49,7 @@ var server = http.createServer(function (req, res) {
 })
 
 server.listen(PORT, function () {
+  console.log('Listening on port', PORT)
   nodeschool.repeatedUpdate(process.env.GH_KEY)
     .on('log', function (log) {
       console.log(log)

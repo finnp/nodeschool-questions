@@ -8,6 +8,7 @@ var sublevel = require('level-spaces')
 
 module.exports = function (opts) {
   var db = opts.level || level(opts.storagePath)
+  var repo = opts.repo
 
   var indexdb = sublevel(db, 'index')
   var issuesdb = sublevel(db, 'issues')
@@ -33,7 +34,7 @@ module.exports = function (opts) {
   function update (githubKey, bus, cb) {
     bus.emit('log', 'Update start.')
     bus.emit('log', 'Downloading...')
-    download(issuesdb, githubKey, function (err) {
+    download(issuesdb, githubKey, repo, function (err) {
       if (err) return cb(err)
       bus.emit('log', 'Creating the index...')
       createIndex(indexdb, issuesdb, keysdb, function (err) {
