@@ -3,7 +3,7 @@ var sublevel = require('level-spaces')
 var tokenize = require('./lib/tokenize')
 var concat = require('concat-stream')
 var pump = require('pump')
-var search = require('./lib/search')
+var search = require('./lib/fuzzy')
 var Transform = require('stream').Transform
 
 var db = level(__dirname + '/db')
@@ -38,18 +38,18 @@ calculateOverallTermFrequency(function (err, overalltf) {
           return a[1] < b[1]
         })
       if (!result[0]) return
-      var keywords = result.slice(0, 2)
+      var keywords = result.slice(0, 8)
         .map(function (token) {
           if (token) return token[0]
         })
-      search(indexdb, issuesdb, keywords, 5)
-        .pipe(concat(function (a) {
-          var list = a.map(function (a) {
-            return a.number
-          })
-          if (list.length > 1) console.log(keywords, data.number, '->', list.join())
-          else console.log('skip', keywords)
-        }))
+      search(indexdb, issuesdb, keywords, 5, function (err, result) {
+        if (err) return console.error(err)
+        var list = result.map(function (issue) {
+          return issue.number
+        })
+        if (list.length > 1) console.log(keywords, data.number, '->', list.join())
+        else console.log('skip', keywords)
+      })
     })
 })
 
