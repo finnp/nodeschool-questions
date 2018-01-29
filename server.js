@@ -7,7 +7,7 @@ var url = require('url')
 
 var nodeschool = require('./')({
   storagePath: path.join(__dirname, '/db'),
-  repo: 'nodeschool/berlin'
+  repo: 'nodeschool/discussions'
 })
 
 var PORT = process.env.PORT || 3000
